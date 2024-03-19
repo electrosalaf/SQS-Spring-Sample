@@ -35,7 +35,7 @@ public class AmazonSQSService {
         queueMessagingTemplate.convertAndSend(queueName, message);
     }
 
-    @SqsListener(value = "${cloud.aws.queue-name}", deletionPolicy = SqsMessageDeletionPolicy.ON_SUCCESS)
+    @SqsListener(value = "${app.queue.name}", deletionPolicy = SqsMessageDeletionPolicy.ON_SUCCESS)
     public void readMessageFromQueue(String message) {
         log.info("Message read from queue: {}", message);
         System.out.println("Message read from queue: " + message);
