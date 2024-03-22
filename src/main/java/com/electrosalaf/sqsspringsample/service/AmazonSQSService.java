@@ -41,6 +41,5 @@ public class AmazonSQSService {
         System.out.println("Message read from queue: " + message);
     }
 
-
 }
 
