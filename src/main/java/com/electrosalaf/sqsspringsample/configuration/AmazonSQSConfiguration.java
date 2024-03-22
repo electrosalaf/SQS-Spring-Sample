@@ -27,7 +27,8 @@ public class AmazonSQSConfiguration {
     @Value("${cloud.aws.region.static}")
     private String region;
 
-    private AmazonSQSAsync buildAmazonSQSAsync() {
+    @Bean
+    public AmazonSQSAsync buildAmazonSQSAsync() {
 
         BasicAWSCredentials credentials = new BasicAWSCredentials(accessKey, secretKey);
 
@@ -39,8 +40,8 @@ public class AmazonSQSConfiguration {
     }
 
     @Bean
-    public QueueMessagingTemplate queueMessagingTemplate() {
-        return new QueueMessagingTemplate(buildAmazonSQSAsync());
+    public QueueMessagingTemplate queueMessagingTemplate(final AmazonSQSAsync amazonSQSAsync) {
+        return new QueueMessagingTemplate(amazonSQSAsync);
     }
 
 
