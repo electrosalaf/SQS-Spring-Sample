@@ -5,18 +5,18 @@ server:
 cloud:
   aws:
     region:
-      static: ${AWS_REGION}
+      static: ${AWS_REGION:}
       auto: false
     stack:
       auto: false
     credentials:
-      access-key: ${AWS_ACCESS-KEY_ID}
-      secret-key: ${AWS_SECRET_KEY}
+      access-key: ${AWS_ACCESS-KEY_ID:}
+      secret-key: ${AWS_SECRET_KEY:}
     end-point:
-      uri: ${AWS_ENDPOINT_URI}
+      uri: ${AWS_ENDPOINT_URI:}
 
 app:
   queue:
-    name: ${QUEUE_NAME}
+    name: ${QUEUE_NAME:}
 
 
