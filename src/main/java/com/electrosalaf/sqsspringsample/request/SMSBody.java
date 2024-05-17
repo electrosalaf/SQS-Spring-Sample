@@ -17,7 +17,7 @@ import lombok.ToString;
 @Builder
 @ToString
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class SwopSMSBody {
+public class SMSBody {
     private String id;
     private String receiver;
     private String sender;

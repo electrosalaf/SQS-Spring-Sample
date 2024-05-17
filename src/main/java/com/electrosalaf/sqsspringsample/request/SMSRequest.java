@@ -15,6 +15,6 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class SwopSMSRequest {
-    private List<SwopSMSBody> sms;
+public class SMSRequest {
+    private List<SMSBody> sms;
 }
