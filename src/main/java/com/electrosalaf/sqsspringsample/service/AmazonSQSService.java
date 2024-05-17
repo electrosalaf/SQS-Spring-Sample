@@ -1,10 +1,10 @@
 package com.electrosalaf.sqsspringsample.service;
 
 import com.electrosalaf.sqsspringsample.request.NotificationServiceRequest;
-import com.electrosalaf.sqsspringsample.request.SwopSMSBody;
-import com.electrosalaf.sqsspringsample.request.SwopSMSRequest;
+import com.electrosalaf.sqsspringsample.request.SMSBody;
+import com.electrosalaf.sqsspringsample.request.SMSRequest;
 import com.electrosalaf.sqsspringsample.response.NotificationServiceResponse;
-import com.electrosalaf.sqsspringsample.response.SwopSMSResponse;
+import com.electrosalaf.sqsspringsample.response.SMSResponse;
 import com.electrosalaf.sqsspringsample.util.ClientUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -68,7 +68,7 @@ public class AmazonSQSService {
     }
 
     public NotificationServiceResponse sendSmsAndForwardToQueue(NotificationServiceRequest notificationServiceRequest) {
-        SwopSMSBody swopSmsBody = SwopSMSBody.builder()
+        SMSBody smsBody = SMSBody.builder()
                 .id(generateRandomRequestId())
                 .receiver(notificationServiceRequest.getRequesterPhoneNumber())
                 .sender("SWOP")
@@ -76,8 +76,8 @@ public class AmazonSQSService {
                 .type("sms")
                 .build();
 
-        SwopSMSRequest smsRequest = SwopSMSRequest.builder()
-                .sms(List.of(swopSmsBody))
+        SMSRequest smsRequest = SMSRequest.builder()
+                .sms(List.of(smsBody))
                 .build();
 
         HttpHeaders httpHeaders = new HttpHeaders();
@@ -85,7 +85,7 @@ public class AmazonSQSService {
         httpHeaders.add("Authorization", generateBasicAuth(smsUsername, smsPassword));
 
         try {
-            SwopSMSResponse response = apiClientService.postRequestWithHeaders(smsUrl, ClientUtil.getGsonMapper().toJson(smsRequest), httpHeaders, SwopSMSResponse.class).getBody();
+            SMSResponse response = apiClientService.postRequestWithHeaders(smsUrl, ClientUtil.getGsonMapper().toJson(smsRequest), httpHeaders, SMSResponse.class).getBody();
             log.info("The sms response : {}", response);
 
             // Send Message to the queue
