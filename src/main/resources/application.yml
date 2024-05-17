@@ -10,7 +10,7 @@ cloud:
     stack:
       auto: false
     credentials:
-      access-key: ${AWS_ACCESS-KEY_ID:}
+      access-key: ${AWS_ACCESS_KEY_ID:}
       secret-key: ${AWS_SECRET_KEY:}
     end-point:
       uri: ${AWS_ENDPOINT_URI:}

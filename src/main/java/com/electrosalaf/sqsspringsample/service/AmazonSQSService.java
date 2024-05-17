@@ -1,13 +1,26 @@
 package com.electrosalaf.sqsspringsample.service;
 
+import com.electrosalaf.sqsspringsample.request.NotificationServiceRequest;
+import com.electrosalaf.sqsspringsample.request.SMSBody;
+import com.electrosalaf.sqsspringsample.request.SMSRequest;
+import com.electrosalaf.sqsspringsample.response.NotificationServiceResponse;
+import com.electrosalaf.sqsspringsample.response.SMSResponse;
+import com.electrosalaf.sqsspringsample.util.ClientUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.aws.messaging.core.QueueMessagingTemplate;
 import org.springframework.cloud.aws.messaging.listener.SqsMessageDeletionPolicy;
 import org.springframework.cloud.aws.messaging.listener.annotation.SqsListener;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+import static com.electrosalaf.sqsspringsample.service.ApiClientService.generateBasicAuth;
 
 /**
  * @author Ibrahim Lawal
@@ -25,9 +38,23 @@ public class AmazonSQSService {
     @Value("${cloud.aws.end-point.uri}")
     private String awsUri;
 
+    @Value("${default.sender.mail:}")
+    private String defaultSender;
+
+    @Value("${swop.sms.url:}")
+    private String smsUrl;
+
+    @Value("${swop.sms.username:}")
+    private String smsUsername;
+
+    @Value("${swop.sms.password:}")
+    private String smsPassword;
+
     private final QueueMessagingTemplate queueMessagingTemplate;
 
-    public void putMessageToQueue(String message) {
+    private final ApiClientService apiClientService;
+
+    public void putMessageToQueue(Object message) {
         queueMessagingTemplate.send(awsUri, MessageBuilder.withPayload(message).build());
     }
 
@@ -38,6 +65,42 @@ public class AmazonSQSService {
     @SqsListener(value = "${app.queue.name}", deletionPolicy = SqsMessageDeletionPolicy.ON_SUCCESS)
     public void readMessageFromQueue(String message) {
         log.info("Message read from queue: {}", message);
+    }
+
+    public NotificationServiceResponse sendSmsAndForwardToQueue(NotificationServiceRequest notificationServiceRequest) {
+        SMSBody smsBody = SMSBody.builder()
+                .id(generateRandomRequestId())
+                .receiver(notificationServiceRequest.getRequesterPhoneNumber())
+                .sender("SWOP")
+                .message("Kindly enter this OTP {} to complete your registration on the swop app".replace("{}", notificationServiceRequest.getUserCode()))
+                .type("sms")
+                .build();
+
+        SMSRequest smsRequest = SMSRequest.builder()
+                .sms(List.of(smsBody))
+                .build();
+
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+        httpHeaders.add("Authorization", generateBasicAuth(smsUsername, smsPassword));
+
+        try {
+            SMSResponse response = apiClientService.postRequestWithHeaders(smsUrl, ClientUtil.getGsonMapper().toJson(smsRequest), httpHeaders, SMSResponse.class).getBody();
+            log.info("The sms response : {}", response);
+
+            // Send Message to the queue
+
+            putMessageToQueue(notificationServiceRequest);
+        } catch (Exception e) {
+            log.error("Error occurred while sending SMS and forwarding to queue: {}", e.getMessage());
+            e.printStackTrace();
+        }
+
+        return new NotificationServiceResponse();
+    }
+
+    private String generateRandomRequestId(){
+        return "swop".concat(RandomStringUtils.randomAlphanumeric(5));
     }
 
 }
