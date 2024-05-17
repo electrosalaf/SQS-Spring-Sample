@@ -1,10 +1,12 @@
 package com.electrosalaf.sqsspringsample.controller;
 
+import com.electrosalaf.sqsspringsample.request.NotificationServiceRequest;
 import com.electrosalaf.sqsspringsample.service.AmazonSQSService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -24,9 +26,9 @@ public class AmazonSQSController {
         amazonSQSService.putMessageToQueue(message);
     }
 
-    @PostMapping({"/write/{message}"})
-    public void writeMessageToQueue(@PathVariable(value = "message") String message) {
-        amazonSQSService.writeMessageToQueue(message);
+    @PostMapping({"/send-sms-and-forward"})
+    public void writeMessageToQueue(@RequestBody NotificationServiceRequest notificationServiceRequest) {
+        amazonSQSService.sendSmsAndForwardToQueue(notificationServiceRequest);
     }
 
 
